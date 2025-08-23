@@ -1,3 +1,6 @@
 .qodo
 venv
 poetry.lock
+__pycache__
+.pytest_cache
+.vscode
