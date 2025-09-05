@@ -45,7 +45,7 @@ class Injector:
         for param in params:
             value = None
             if get_origin(param.annotation) is Annotated:
-                value = self._get_parameter(param)
+                value = await self._get_parameter(param)
             elif param.default is not inspect.Parameter.empty:
                 value = param.default
 
