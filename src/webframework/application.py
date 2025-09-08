@@ -16,12 +16,16 @@ class App:
         method = scope["method"]
         path = scope["path"]
         headers = scope_headers_in_dict(scope)
-        handler, path_pattern = self._router.get_handler_and_pattern(method, path)
-        path_params = extract_path_params(path_pattern, path)
-        body = await _get_body(receive)
-        request = Request(method, path, path_params, body, headers)
-        request_var.set(request)
-        response: Response = await Injector(handler).run()
+        try:
+            handler, path_pattern = self._router.get_handler_and_pattern(method, path)
+        except LookupError:
+            response = Response(404, b"Request handler not found", headers={})
+        else:
+            path_params = extract_path_params(path_pattern, path)
+            body = await _get_body(receive)
+            request = Request(method, path, path_params, body, headers)
+            request_var.set(request)
+            response: Response = await Injector(handler).run()
         await send(
             {
                 "type": "http.response.start",
