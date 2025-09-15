@@ -34,9 +34,11 @@ def path(name: str) -> Callable[[], str]:
     return wrapper
 
 
-def body(name: str) -> Callable[[], Any]:
+def body(name: str | None = None) -> Callable[[], Any]:
     def wrapper():
-        return request_var.get().body[name]
+        if name is not None:
+            return request_var.get().body[name]
+        return request_var.get().body
 
     return wrapper
 
@@ -48,8 +50,9 @@ def header(name: str) -> Callable[[], Any]:
     return wrapper
 
 
-def parsed(function: Callable, parser: type) -> Callable:
+def parsed(function: Callable, parser: Any) -> Callable:
     def wrapper():
-        return parser(function())
+        result = parser(function())
+        return result
 
     return wrapper

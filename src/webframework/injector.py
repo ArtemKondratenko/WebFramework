@@ -1,7 +1,7 @@
 import inspect
 from typing import Any
 from webframework.types import Handler
-from typing import Annotated, get_args, get_origin
+from typing import Annotated, get_args, get_origin, get_type_hints
 
 
 class ProviderNotFoundError(Exception):
@@ -18,9 +18,9 @@ class Injector:
         self._args = []
         self._kwargs = {}
 
-    async def _get_parameter(self, param: inspect.Parameter) -> Any:
+    async def _get_parameter(self, type_hint: Any) -> Any:
         """Возвращает значение аргумента если параметр является Annotated"""
-        args = get_args(param.annotation)
+        args = get_args(type_hint)
         function = args[1]
         sig = inspect.signature(function)
         values = []
@@ -42,12 +42,15 @@ class Injector:
         sig = inspect.signature(self._handler)
         params = list(sig.parameters.values())
 
+        type_hints = get_type_hints(self._handler, include_extras=True)
+
         for param in params:
-            value = None
-            if get_origin(param.annotation) is Annotated:
-                value = await self._get_parameter(param)
+            if get_origin(type_hints.get(param.name)) is Annotated:
+                value = await self._get_parameter(type_hints[param.name])
             elif param.default is not inspect.Parameter.empty:
                 value = param.default
+            else:
+                raise ProviderNotFoundError
 
             if param.kind in (
                 inspect.Parameter.POSITIONAL_ONLY,
