@@ -48,7 +48,7 @@ def test_get_handler_is_there() -> None:
     handler = f
     router.register(method, path, handler)
 
-    assert router.get_handler(method, path) is f
+    assert router.get_handler_and_pattern(method, path) is f
 
 
 def test_get__no_handler() -> None:
@@ -63,4 +63,4 @@ def test_get__no_handler() -> None:
     router.register(method, path, handler)
 
     with pytest.raises(LookupError):
-        router.get_handler(method="POST", path="/users/vanya/friends")
+        router.get_handler_and_pattern(method="POST", path="/users/vanya/friends")
